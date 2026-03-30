@@ -1,7 +1,10 @@
 import numpy as np
 import pandas as pd
 
-def generar_matriz_transicion(path):
+def generar_matriz_transicion():
+
+    path = "./data/data.csv"
+
     df = pd.read_csv(path, header=None, names=["Fecha", "Numero"], dtype={'Numero': str})
     numeros = df['Numero'].values
     
@@ -18,16 +21,14 @@ def generar_matriz_transicion(path):
         # Se saca la probabilidad en cada punto
         suma = frecuencias.sum(axis=1, keepdims=True)
         p = np.divide(frecuencias, suma, out=np.zeros_like(frecuencias), where=suma!=0)
-        matrices[f"Posicion_{i+1}"] = p
+        matrices[f"Digito_{i+1}"] = p
     
     return matrices
 
-if __name__ == "__main__":
-    path = "./data/data.csv" 
-    resultado_matrices = generar_matriz_transicion(path)
-        
-    for nombre, matriz in resultado_matrices.items():
-        print(f"{nombre}:")
-        print(pd.DataFrame(matriz)) 
-        print("\n")
+def matrix_generator_n_day(matriz_transicion, estado, dias):
+    v0 = np.zeros(10)
+    v0[int(estado)] = 1
+    Pn = np.linalg.matrix_power(matriz_transicion, dias)
+    return np.dot(v0, Pn)
+
             
