@@ -14,8 +14,10 @@ for i in range(total_dias):
     d3 = np.random.randint(0, 10)
     numero = f"{d1}{d2}{d3}"
     
-    registros.append([fecha_actual.strftime('%Y-%m-%d'), numero])
+    registros.append([fecha_actual.strftime('%Y/%m/%d'), numero])
 
 
 df = pd.DataFrame(registros, columns=["Fecha", "Numero"])
 df.to_csv("./data/data.csv", index=False, header=False)
+
+#NO EJECUTAR
