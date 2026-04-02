@@ -2,6 +2,7 @@ from src.model.matrix_generator import generar_matriz_transicion
 from src.usecases.show_matrix import show_matrix
 from src.usecases.probabilities import  number_n_day_probability
 from src.usecases.max_number import full_number_probability
+from src.ui.interface import startInterface
 
 matrices = generar_matriz_transicion() 
 
@@ -13,7 +14,8 @@ while True:
     print("1. Ver número más probable")
     print("2. Ver probabilidades de un número específico")
     print("3. Ver matrices de transición")
-    print("4. Salir")
+    print("4. Ver interfaz basica incompleta")
+    print("5. Salir")
     
     opcion = input("\nSeleccione una opción: ")
 
@@ -46,8 +48,11 @@ while True:
             # Visualizar probabilidades de transición
             print("\nMATRICES ESTOCÁSTICAS:")
             show_matrix(matrices)
-        
+
         case "4":
+            startInterface()
+            break  
+        case "5":
             print("Saliendo del sistema...")
             break
         
