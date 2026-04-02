@@ -1,46 +1,97 @@
 import tkinter as tk
+from tkinter import simpledialog
 import pandas as pd
 from src.model.matrix_generator import generar_matriz_transicion
-from src.usecases.show_matrix import show_matrix
-##from src.usecases.probabilities import  number_n_day_probability
 from src.usecases.max_number import full_number_probability
+from src.usecases.probabilities import number_n_day_probability
 
+list_enumeracion = ["Primer Dígito", "Segundo Dígito", "Tercer Dígito"]
 
+#Esta función se ejecuta al iniciar la interfaz, tal y como sigue la lógica el main
+#Genera la matriz de transición y pide los datos que solicita el main, pero de una forma más práctica
+def initValues():
+    matrices = generar_matriz_transicion()
+    ultimo_resultado = simpledialog.askstring("Ultimo resultado de la lotería", "Ingrese el último número de la lotería (3 dígitos): ")
+    dias_proyeccion = simpledialog.askinteger("Días de proyección", "¿A cuántos días quiere calcular la predicción?: ")
+    return matrices, ultimo_resultado, dias_proyeccion
 
 def startInterface():
-    matrices = generar_matriz_transicion() 
-    ultimo_resultado = 0
-    dias_proyeccion = 0
-    num_predicho = 0
+    #Arrancamos el programa solicitando los valores pertinentes
+    matrixs, last_result, projection_days = initValues()
 
-    def get_num_predicho(entry):
-        nonlocal num_predicho
-        num_predicho = entry.get()
-        num_predicho = str(num_predicho)
-        print(f"Numero elegido a ver su probabilidad capturado: {num_predicho}")
+    root = tk.Tk()
+    root.title("Markov Chain Lottery Predictor")
+    root.resizable(True, True)
+
+    titulo = tk.Label(root, text="Análisis de la lotería - Markov", font=("Arial", 20, "bold"))
+    titulo.pack(pady=20)
     
-    def get_ultimo_resultado(entry):
-        nonlocal ultimo_resultado
-        ultimo_resultado = entry.get()
-        ultimo_resultado = str(ultimo_resultado)
-        print(f"Numero capturado: {ultimo_resultado}")
+    #Contenedor principal, aquí se agregan las opciones en el main
+    main_c = tk.Frame(root)
+    main_c.pack(pady=20, anchor="w")
 
-    def get_dias_proyeccion(entry):
-        nonlocal dias_proyeccion
-        dias_proyeccion = entry.get()
-        dias_proyeccion = int(dias_proyeccion) 
-        print(f"Dias capturado: {dias_proyeccion}")
+    #----------------- Contenedor -----------------
 
+    #Ver número más probable
+    ask_num = tk.Label(main_c, text="Ver número más probable", font=("Arial", 14))
+    an_button = tk.Button(main_c, text="Ver número")
+    ask_num.grid(row=0, column=0, padx=20, pady=5, sticky="w")
+    an_button.grid(row=1, column=0, padx=20, pady=25, sticky="w")
+
+    #Ver probabilidades de un número específico
+    ask_num_prob = tk.Label(main_c, text="Ver probabilidades de un número específico", font=("Arial", 14))
+    anp_button = tk.Button(main_c, text="Ver probabilidades")
+    ask_num_prob.grid(row=2, column=0, padx=20, pady=5, sticky="w")
+    anp_button.grid(row=3, column=0, padx=20, pady=25, sticky="w")
+    
+    #Tabla para mostrar las probabilidades de un número específico
+    table_prob = tk.Frame(main_c)
+    table_prob.grid(row=2, column=1, rowspan=2, padx=20, pady=5, sticky="w")
+
+    #Ver matrices de transición
+    ask_matrix = tk.Label(main_c, text="Ver matrices de transición", font=("Arial", 14))
+    am_button = tk.Button(main_c, text="Ver matrices")
+    ask_matrix.grid(row=4, column=0, padx=20, pady=5, sticky="w")
+    am_button.grid(row=5, column=0, padx=20, pady=25, sticky="w")
+
+    #----------------- Comandos para los botones -----------------
+    
+    #Caso "Ver número más probable"
     def call_full_number_probability():
-        result = full_number_probability(matrices, ultimo_resultado, dias_proyeccion)
-        label_resultado1.config(text=f"El valor es: {result}")
+        num_predicho = full_number_probability(matrixs, last_result, projection_days)
+        print("Generando label con el resultado del número más probable calculado...")
+        label_resultado1 = tk.Label(main_c, text=f"El número más probable es: {num_predicho}", font=("Arial", 14,), fg="green")
+        label_resultado1.grid(row=0, column=1, rowspan=2, padx=35, pady=5, sticky="w")
     
+    #Caso "Ver probabilidades de un número específico"
     def call_specific_probability():
-        print("Logica a arreglar hola arturo")
+        print("Generando label con el resultado de probabilidades para un número específico...")
+        num_consulta = simpledialog.askstring("Número a consultar", "Ingrese el número de 3 dígitos a consultar: ")
+        
+        #Mostrar número ingresado
+        tk.Label(table_prob, text=f"Número ingresado", font=("Arial", 14), fg="green").grid(row=0, column=0, padx=35, pady=5)
+        tk.Label(table_prob, text=f"{num_consulta}", font=("Arial", 12), fg="green").grid(row=1, column=0, padx=35, pady=5)
+        
+        prob_conjunta = 1.0
+        for i in range(3):
+            m_i = matrixs[f"Digito_{i+1}"]
+            est_actual_i = last_result[i]
+            digito_obj = num_consulta[i]
+            
+            p_i = number_n_day_probability(m_i, digito_obj, est_actual_i, projection_days)
+            prob_conjunta *= p_i
+            
+            #Generar labels para cada dígito y su probabilidad
+            tk.Label(table_prob, text=f"{list_enumeracion[i]} ({digito_obj}):", font=("Arial", 14)).grid(row=0, column=i+1, padx=5, pady=5, sticky="w")
+            tk.Label(table_prob, text=f"Probabilidad: {p_i:.4f}", font=("Arial", 12)).grid(row=1, column=i+1, padx=5, pady=5, sticky="w")
+        
+        #Mostrar probabilidad conjunta
+        tk.Label(table_prob, text="Probabilidad conjunta", font=("Arial", 14), fg="blue").grid(row=0, column=5, padx=35, pady=5)
+        tk.Label(table_prob, text=f"{prob_conjunta:.8f}", font=("Arial", 12), fg="blue").grid(row=1, column=5, padx=35, pady=5)
 
+    #Caso "Ver matrices de transición"
     def call_show_matrix():
-        print("Logica de showmatrix")
-        # Crear ventana secundaria
+        print("Mostrando matrices de transición...")
         ventana_matrices = tk.Toplevel(root)
         ventana_matrices.title("Matrices de Transición - Markov")
         ventana_matrices.geometry("600x500")
@@ -56,74 +107,19 @@ def startInterface():
         scrollbar.config(command=texto_area.yview)
 
         # Insertar los datos de las matrices
-        for nombre, matriz in matrices.items():
+        for nombre, matriz in matrixs.items():
             df = pd.DataFrame(matriz)
             texto_area.insert(tk.END, f"--- MATRIZ: {nombre} ---\n")
             texto_area.insert(tk.END, f"{df.to_string()}\n\n")
-        
-        # Bloquear el texto para que sea solo lectura
-        texto_area.config(state=tk.DISABLED)
-
-
-
-    root = tk.Tk()
-    root.state('zoomed')
-    root.title("Analisis Loteria Uso de Markov")
-
-
-    titulo = tk.Label(root, text="Analisis Loteria Uso de Markov", font=("Arial", 20, "bold"))
-    titulo.grid(row=1, column=0, padx=20 ,pady=20)
+            
+    #------------ Configurar comandos de los botones -----------------
     
-
-    # Fila 1 
-    label_ask1 = tk.Label(root, text="Último número (3 dígitos):", font=("Arial", 12))
-    label_ask1.grid(row=2, column=0, padx=10, pady=10) 
-
-    entry_ask1 = tk.Entry(root)
-    entry_ask1.grid(row=2, column=1, padx=10, pady=10)
-
-    boton_ask1 = tk.Button(root, text="Enviar", command=lambda: get_ultimo_resultado(entry_ask1))
-    boton_ask1.grid(row=2, column=2, padx=10, pady=10)
-
-    # Fila 2 
-    label_ask2 = tk.Label(root, text="Días para la predicción:", font=("Arial", 12))
-    label_ask2.grid(row=2, column=3, padx=10, pady=10)
-
-    entry_ask2 = tk.Entry(root)
-    entry_ask2.grid(row=2, column=4, padx=10, pady=10)
-
-    boton_ask2 = tk.Button(root, text="Enviar", command=lambda: get_dias_proyeccion(entry_ask2))
-    boton_ask2.grid(row=2, column=5, padx=10, pady=10)
-
-    # Opciones a ejecutar
-    opciones = tk.Label(root, text="Seleccione una opcion ", font=("Arial", 20, "bold"))
-    opciones.grid(row=3, column=0, padx=20 ,pady=20)
-
-    # Opcion 1: Numero más Probable
-    boton_op1 = tk.Button(root, text="Ver número más probable", command=call_full_number_probability)
-    boton_op1.grid(row=4, column=0, padx=10, pady=10)
-
-    label_resultado1 = tk.Label(root, text="Resultado 1 aqui", font=("Arial", 12))
-    label_resultado1.grid(row=5, column=0, padx=10, pady=10)
-
-    # Opcion 2: Ver probabilidades de un número específico"
-    boton_op2 = tk.Button(root, text="Ver probabilidades de un número específico", command=call_specific_probability) #Cambiar la funcion por la nueva funcion a generar arturo te invoco
-    boton_op2.grid(row=4, column=1, padx=10, pady=10)
-
-    entry_op2 = tk.Entry(root)
-    entry_op2.grid(row=5, column=1, padx=10, pady=10)
-
-    boton_op2 = tk.Button(root, text="Enviar", command=lambda: get_num_predicho(entry_op2))
-    boton_op2.grid(row=5, column=2, padx=10, pady=10)
-
-    label_resultado2 = tk.Label(root, text="Resultado 2 aqui", font=("Arial", 12))
-    label_resultado2.grid(row=6, column=1, padx=10, pady=10)
-
-    #Opcion 3: Ver matrices de transición
-    boton_op3 = tk.Button(root, text="Ver matrices de transición", command=call_show_matrix) #Cambiar la funcion por la nueva funcion a generar arturo te invoco
-    boton_op3.grid(row=4, column=3, padx=10, pady=10)
-
-
-
+    an_button.config(command=call_full_number_probability)
+    anp_button.config(command=call_specific_probability)
+    am_button.config(command=call_show_matrix)
     
+    #Cerrar correctamente la interfaz
+    
+    root.protocol("WM_DELETE_WINDOW", root.quit())
     root.mainloop()
+    print("Interfaz cerrada correctamente, finalizando programa...")
