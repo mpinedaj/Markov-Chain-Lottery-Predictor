@@ -37,6 +37,7 @@ def descargar_datos_ny():
     fecha_desde = obtener_ultima_fecha_csv()
     hoy = date.today()
     hoy = hoy.strftime('%m/%d/%Y')
+    print(str(hoy))
     
     if str(fecha_desde) == hoy:
         print("Datos al día")
@@ -116,12 +117,3 @@ def actualizar_csv():
         
     df_combinado.to_csv(path, index=False, header=False)
     print("Archivo actualizado correctamente")
-    
-    print("\nÚltimos 5 registros:")
-    print(df_combinado.head().to_string(index=False, header=False))
-        
-def main():
-    actualizar_csv()
-
-if __name__ == "__main__":
-    main()
