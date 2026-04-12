@@ -2,10 +2,9 @@ import requests
 import pandas as pd
 from datetime import datetime, date
 import os
-import json
 import sys
 
-path = "../data/data.csv"
+path = "./data/data.csv"
 url = "https://data.ny.gov/resource/n4w8-wxte.json"
 
 #Obtener la ultima fecha del CSV

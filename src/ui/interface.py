@@ -9,16 +9,13 @@ list_enumeracion = ["Primer Dígito", "Segundo Dígito", "Tercer Dígito"]
 
 def initValues():
     matrices = generar_matriz_transicion()
-    ultimo_resultado = simpledialog.askstring("Ultimo resultado de la lotería", "Ingrese el último número de la lotería (3 dígitos): ")
-    if len(ultimo_resultado) != 3 or not ultimo_resultado.isdigit():
-        raise ValueError("El último resultado debe ser un número de 3 dígitos.")
     dias_proyeccion = simpledialog.askinteger("Días de proyección", "¿A cuántos días quiere calcular la predicción?: ")
     if dias_proyeccion is None or dias_proyeccion <= 0:
         raise ValueError("El número de días de proyección debe ser un entero positivo.")
-    return matrices, ultimo_resultado, dias_proyeccion
+    return matrices, dias_proyeccion
 
-def startInterface():
-    matrixs, last_result, projection_days = initValues()
+def startInterface(last_result):
+    matrixs, projection_days = initValues()
 
     root = tk.Tk()
     root.title("Markov Chain Lottery Predictor")
