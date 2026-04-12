@@ -77,10 +77,12 @@ def procesar_datos():
         if draw_date and midday:
             fecha = datetime.strptime(draw_date[:10], '%Y-%m-%d')
             fecha_formateada = fecha.strftime('%m/%d/%Y')
+            
+            midday_formateado = str(midday).zfill(3)
                 
             registros.append({
                 'fecha': fecha_formateada,
-                'midday': midday
+                'midday': midday_formateado
             })
         
     df = pd.DataFrame(registros)
@@ -100,6 +102,7 @@ def actualizar_csv():
     
     if os.path.exists(path):
         df_existente = pd.read_csv(path, header=None, names=['fecha', 'midday'])
+        df_existente['midday'] = df_existente['midday'].astype(str).str.zfill(3)
         print(f"Cantidad de registros existentes: {len(df_existente)}")
         
         df_combinado = pd.concat([df_existente, df], ignore_index=True)
