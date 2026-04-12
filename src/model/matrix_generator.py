@@ -2,7 +2,6 @@ import numpy as np
 import pandas as pd
 
 def generar_matriz_transicion():
-
     path = "./data/data.csv"
 
     df = pd.read_csv(path, header=None, names=["Fecha", "Numero"], dtype={'Numero': str})
@@ -26,9 +25,11 @@ def generar_matriz_transicion():
     return matrices
 
 def matrix_generator_n_day(matriz_transicion, estado, dias):
-    v0 = np.zeros(10)
-    v0[int(estado)] = 1
-    Pn = np.linalg.matrix_power(matriz_transicion, dias)
-    return np.dot(v0, Pn)
+    v = np.zeros(10)
+    v[int(estado)] = 1
+    #Pn = np.linalg.matrix_power(matriz_transicion, dias) {Actualmente pesado computacionalmente y no solicitado por el profe}
+    for _ in range(dias):
+        v = np.dot(v, matriz_transicion)
+    return v
 
             
