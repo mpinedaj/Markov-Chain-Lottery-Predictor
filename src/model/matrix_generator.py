@@ -27,9 +27,10 @@ def generar_matriz_transicion():
 def matrix_generator_n_day(matriz_transicion, estado, dias):
     v = np.zeros(10)
     v[int(estado)] = 1
-    #Pn = np.linalg.matrix_power(matriz_transicion, dias) {Actualmente pesado computacionalmente y no solicitado por el profe}
-    for _ in range(dias):
-        v = np.dot(v, matriz_transicion)
-    return v
 
+    pi_t = matriz_transicion.T
+    
+    for _ in range(dias):
+        v = np.dot(pi_t, v)
+    return v
             
